@@ -1,2 +1,2 @@
-# miniBlockchain
-A Bare minimum Block Chain implementation in Python
+# glueWithTrees
+A bunch of mixed code hoping to add trees in the existing glue architecture
