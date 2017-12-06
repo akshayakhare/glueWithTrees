@@ -1,98 +1,3 @@
-'''import sys
-from PyQt4 import QtGui
-import matplotlib.pyplot as plt
-
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-
-import networkx as nx
-
-try:
-    import pygraphviz
-    from networkx.drawing.nx_agraph import graphviz_layout
-except ImportError:
-    try:
-        import pydot
-        from networkx.drawing.nx_pydot import graphviz_layout
-    except ImportError:
-        raise ImportError("This example needs Graphviz and either "
-                          "PyGraphviz or pydot")
-
-
-class PrettyWidget(QtGui.QWidget):
-
-    def __init__(self):
-        super(PrettyWidget, self).__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(600, 300, 1000, 600)
-        self.center()
-        self.setWindowTitle('GUI Plotting')
-
-        grid = QtGui.QGridLayout()
-        self.setLayout(grid)
-
-        btn1 = QtGui.QPushButton('Plot 1', self)
-        btn1.resize(btn1.sizeHint())
-        btn1.clicked.connect(self.plot1)
-        grid.addWidget(btn1, 2, 0)
-
-        btn2 = QtGui.QPushButton('Plot 2', self)
-        btn2.resize(btn2.sizeHint())
-        btn2.clicked.connect(self.plot2)
-        grid.addWidget(btn2, 2, 1)
-
-        self.figure = plt.figure(figsize=(15, 5))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        grid.addWidget(self.canvas, 1, 0, 1, 2)
-        grid.addWidget(self.toolbar, 0, 0, 1, 2)
-
-        self.show()
-
-    def plot1(self):
-        plt.cla()
-        ax = self.figure.add_subplot(111)
-        # x = [i for i in range(100)]
-        # y = [i**2 for i in x]
-        # ax.plot(x, y, 'b.-')
-        G = nx.balanced_tree(3, 5)
-        pos = graphviz_layout(G, prog='twopi', args='')
-        plt.figure(figsize=(8, 8))
-        plt.axis('equal')
-        ax.plot(nx.draw(G, pos, node_size=100, alpha=0.5,
-                        node_color="blue", with_labels=False))
-        ax.set_title('Quadratic Plot')
-        self.canvas.draw()
-        # plt.show()
-
-    def plot2(self):
-        plt.cla()
-        ax = self.figure.add_subplot(111)
-        x = [i for i in range(100)]
-        y = [i**0.5 for i in x]
-        ax.plot(x, y, 'r.-')
-        ax.set_title('Square Root Plot')
-        self.canvas.draw()
-
-    def center(self):
-        qr = self.frameGeometry()
-        cp = QtGui.QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
-
-
-def main():
-    app = QtGui.QApplication(sys.argv)
-    w = PrettyWidget()
-    app.exec_()
-
-
-if __name__ == '__main__':
-    main()
-'''
-
 import sys
 import os
 import random
@@ -125,15 +30,16 @@ progversion = "0.1"
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, G, parent=None, width=5, height=4, dpi=100):
+        # def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
 
-        self.compute_initial_figure()
+        # G = nx.balanced_tree(3, 5)
+        self.compute_initial_figure(G)
 
-        #
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
@@ -150,12 +56,12 @@ class MyMplCanvas(FigureCanvas):
 class MyStaticMplCanvas(MyMplCanvas):
     """Simple canvas with a sine plot."""
 
-    def compute_initial_figure(self):
+    def compute_initial_figure(self, G):
         # G = nx.path_graph(10)
         # pos = nx.spring_layout(G)
         # nx.draw(G, pos, ax=self.axes)
 
-        G = nx.balanced_tree(3, 5)
+        # G = nx.balanced_tree(3, 5)
         pos = graphviz_layout(G, prog='twopi', args='')
         # plt.figure(figsize=(8, 8))
         nx.draw(G, pos, node_size=100, alpha=0.5,
@@ -164,9 +70,16 @@ class MyStaticMplCanvas(MyMplCanvas):
         # plt.axis('equal')
         # plt.show()
 
+    def __init__(self, G, parent=None, width=5, height=4, dpi=100):
+        # do nothing
+        print("G in mystaticmplcanvas", G)
+        super(MyStaticMplCanvas, self).__init__(
+            G, parent=None, width=5, height=4, dpi=100)
+
 
 class ApplicationWindow(QtGui.QMainWindow):
-    def __init__(self):
+    def __init__(self, G):
+        # def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
@@ -185,7 +98,10 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget(self)
 
         l = QtGui.QVBoxLayout(self.main_widget)
-        sc = MyStaticMplCanvas(self.main_widget, width=5,
+        # G = nx.balanced_tree(3, 5)
+        print("value of G is", G)
+        sc = MyStaticMplCanvas(G, self.main_widget,  width=5,
+                               # sc = MyStaticMplCanvas(self.main_widget, width=5,
                                height=4, dpi=100)
         l.addWidget(sc)
 
@@ -206,7 +122,10 @@ class ApplicationWindow(QtGui.QMainWindow):
 
 qApp = QtGui.QApplication(sys.argv)
 
-aw = ApplicationWindow()
+G = nx.balanced_tree(3, 5)
+
+# aw = ApplicationWindow()
+aw = ApplicationWindow(G)
 aw.setWindowTitle("%s" % progname)
 aw.show()
 sys.exit(qApp.exec_())
