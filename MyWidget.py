@@ -11,6 +11,9 @@ import networkx as nx
 from scipy.cluster import hierarchy
 import numpy as np
 
+import pandas as pd
+import squarify
+
 
 try:
     import pygraphviz
@@ -35,7 +38,7 @@ class MyMplCanvas(FigureCanvas):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
-        self.axes.hold(False)
+        # self.axes.hold(False)
 
         self.compute_initial_figure(G)
 
@@ -68,6 +71,14 @@ class MyStaticMplCanvas(MyMplCanvas):
         else:
             nx.draw(G, pos, node_size=100, alpha=0.5,
                     node_color="blue", with_labels=False, ax=self.axes)
+            # # Tree Map
+            # df = pd.DataFrame({'nb_people': [8, 3, 4, 2], 'group': [
+            #     "group A", "group B", "group C", "group D"]})
+            # squarify.plot(sizes=df['nb_people'],
+            #               label=df['group'], alpha=.8, ax=self.axes)
+
+            # # plt.axis('off')
+            # # Tree Map Ends
         # ax = self.axes('equal'))
         # plt.axis('equal')
         # plt.show()
@@ -79,14 +90,15 @@ class MyStaticMplCanvas(MyMplCanvas):
             G, parent=None, width=5, height=4, dpi=100)
 
 
-qApp = QtGui.QApplication(sys.argv)
+# qApp = QtGui.QApplication(sys.argv)
 
-G = nx.balanced_tree(3, 5)
-
-# # aw = ApplicationWindow()
-aw = MyStaticMplCanvas(G, QtGui.QWidget(),  width=5,
-                       height=4, dpi=100)
+# G = nx.balanced_tree(4, 5)
+# # G = None
+# # # aw = ApplicationWindow()
+# aw = MyStaticMplCanvas(G, QtGui.QWidget(),  width=5,
+#                        height=4, dpi=100)
 # aw.setWindowTitle("%s" % progname)
 # aw.show()
+# qApp.exec_()
 # sys.exit(qApp.exec_())
 # qApp.exec_()
